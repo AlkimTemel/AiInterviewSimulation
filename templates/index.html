@@ -1,0 +1,253 @@
+<!DOCTYPE html>
+<html lang="tr">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Otonom İK Mülakat Koçu</title>
+    <style>
+        :root { --primary: #2563eb; --danger: #dc2626; --success: #22c55e; --bg: #f8fafc; }
+        body { font-family: 'Segoe UI', system-ui, sans-serif; background-color: var(--bg); display: flex; flex-direction: column; align-items: center; padding: 20px; color: #1e293b; }
+        .container { max-width: 800px; width: 100%; background: white; padding: 30px; border-radius: 15px; box-shadow: 0 10px 25px rgba(0,0,0,0.1); }
+        
+        .form-group { margin-bottom: 20px; }
+        .form-group label { display: block; font-weight: 600; margin-bottom: 8px; color: #334155; }
+        .form-group select { width: 100%; padding: 12px; border-radius: 8px; border: 1px solid #cbd5e1; font-size: 15px; outline: none; }
+        
+        .video-container { position: relative; width: 100%; background: #000; border-radius: 12px; overflow: hidden; border: 4px solid #e2e8f0; margin-bottom: 15px; }
+        #videoElement { width: 100%; aspect-ratio: 16/9; object-fit: cover; transform: scaleX(-1); }
+        
+        .btn { padding: 12px 25px; font-size: 16px; font-weight: 600; border: none; border-radius: 8px; cursor: pointer; color: white; transition: 0.3s; width: 100%; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); }
+        .btn-primary { background-color: var(--primary); }
+        .btn-danger { background-color: var(--danger); animation: pulse 1.5s infinite; }
+        
+        .transcript-box { background: #f1f5f9; border: 1px solid #cbd5e1; border-radius: 10px; padding: 15px; min-height: 150px; max-height: 250px; overflow-y: auto; font-size: 16px; line-height: 1.6; margin-top: 15px;}
+        
+        @keyframes pulse { 0% { transform: scale(1); } 50% { transform: scale(1.02); } 100% { transform: scale(1); } }
+    </style>
+</head>
+<body>
+
+<div class="container" id="surveySection">
+    <h2 style="text-align: center; margin-top: 0; color: var(--primary);">Mülakat Profilinizi Oluşturun</h2>
+    <p style="text-align: center; color: #64748b; margin-bottom: 25px;">Sistem, mülakat sorusunu aşağıdaki seçimlerinize göre otonom olarak üretecektir.</p>
+    
+    <div class="form-group">
+        <label>Eğitim ve Deneyim Durumunuz</label>
+        <select id="selEgitim">
+            <option value="Yeni Mezun / Son Sınıf Öğrencisi">Yeni Mezun / Son Sınıf Öğrencisi</option>
+            <option value="1-3 Yıl Deneyimli Junior">1-3 Yıl Deneyimli Junior</option>
+            <option value="Sektör Değiştiren Profesyonel">Sektör Değiştiren Profesyonel</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Başvurduğunuz Departman</label>
+        <select id="selDepartman">
+            <option value="Yazılım Geliştirme (Frontend/Backend)">Yazılım Geliştirme (Frontend/Backend)</option>
+            <option value="Veri Bilimi ve Yapay Zeka">Veri Bilimi ve Yapay Zeka</option>
+            <option value="Üretim ve Kalite Kontrol">Üretim ve Kalite Kontrol</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Hedeflediğiniz Şirket Kültürü</label>
+        <select id="selKultur">
+            <option value="Kurumsal ve Yerleşik (Corporate)">Kurumsal ve Yerleşik (Corporate)</option>
+            <option value="Hızlı Büyüyen Dinamik Girişim (Startup)">Hızlı Büyüyen Dinamik Girişim (Startup)</option>
+        </select>
+    </div>
+
+    <div class="form-group">
+        <label>Ölçülmesini İstediğiniz Ana Yetkinlik (Soft Skill)</label>
+        <select id="selSoftSkill">
+            <option value="Problem Çözme ve Analitik Düşünme">Problem Çözme ve Analitik Düşünme</option>
+            <option value="Liderlik ve İnisiyatif Alma">Liderlik ve İnisiyatif Alma</option>
+            <option value="Stres Yönetimi ve Kriz Anı İletişimi">Stres Yönetimi ve Kriz Anı İletişimi</option>
+        </select>
+    </div>
+
+    <button id="generateBtn" class="btn btn-primary" style="margin-top: 15px;">Mülakatı Başlat ve Soruyu Üret ⚙️</button>
+</div>
+
+<div class="container" id="interviewSection" style="display: none;">
+    <h2 style="text-align: center; margin-top: 0;">AI Mülakat Simülatörü</h2>
+    
+    <div style="background: #eff6ff; border-left: 4px solid var(--primary); padding: 15px; margin-bottom: 20px; border-radius: 4px;">
+        <p id="currentQuestion" style="margin: 0; font-size: 18px; font-weight: 500;">Soru hazırlanıyor, lütfen bekleyin...</p>
+    </div>
+
+    <div class="video-container">
+        <video autoplay id="videoElement"></video>
+    </div>
+
+    <button id="startBtn" class="btn btn-primary">🎤 Cevaplamaya Başla</button>
+
+    <div class="transcript-box" id="transcript">Cevabınız burada anlık olarak görünecek...</div>
+</div>
+
+<script>
+    const surveySection = document.getElementById('surveySection');
+    const interviewSection = document.getElementById('interviewSection');
+    const generateBtn = document.getElementById('generateBtn');
+    
+    const startBtn = document.getElementById('startBtn');
+    const transcriptDiv = document.getElementById('transcript');
+    const video = document.querySelector("#videoElement");
+    const currentQuestionEl = document.getElementById('currentQuestion');
+
+    let isListening = false;
+    let finalTranscript = "";
+    let recognition;
+    let askedQuestion = ""; 
+    let emotionTimer;
+
+    // 1. Soru Üretme ve Ekran Geçişi
+    generateBtn.addEventListener('click', () => {
+        const egitim = document.getElementById('selEgitim').value;
+        const departman = document.getElementById('selDepartman').value;
+        const kultur = document.getElementById('selKultur').value;
+        const soft_skill = document.getElementById('selSoftSkill').value;
+
+        generateBtn.innerText = "Soru Üretiliyor... Lütfen Bekleyin ⏳";
+        generateBtn.disabled = true;
+
+        fetch('/generate_question', {
+            method: 'POST',
+            headers: { 'Content-Type': 'application/json' },
+            body: JSON.stringify({ egitim, departman, kultur, soft_skill })
+        })
+        .then(response => response.json())
+        .then(data => {
+            if (data.status === "success") {
+                askedQuestion = data.question; 
+                currentQuestionEl.innerText = askedQuestion; 
+                
+                surveySection.style.display = 'none';
+                interviewSection.style.display = 'block';
+
+                navigator.mediaDevices.getUserMedia({ video: true, audio: false })
+                    .then(stream => { video.srcObject = stream; })
+                    .catch(err => console.error("Kamera hatası:", err));
+            } else {
+                alert("Soru üretilirken hata oluştu: " + data.error);
+                generateBtn.innerText = "Mülakatı Başlat ve Soruyu Üret ⚙️";
+                generateBtn.disabled = false;
+            }
+        })
+        .catch(err => {
+            alert("Sunucuya bağlanılamadı!");
+            generateBtn.innerText = "Mülakatı Başlat ve Soruyu Üret ⚙️";
+            generateBtn.disabled = false;
+        });
+    });
+
+    // 2. Saf Speech Recognition (Sesi Yazıya Dökme)
+    const SpeechRecognition = window.SpeechRecognition || window.webkitSpeechRecognition;
+    if (SpeechRecognition) {
+        recognition = new SpeechRecognition();
+        recognition.lang = 'tr-TR';
+        recognition.continuous = true;
+        recognition.interimResults = true;
+
+        recognition.onresult = (event) => {
+            let interimTranscript = "";
+            for (let i = event.resultIndex; i < event.results.length; ++i) {
+                if (event.results[i].isFinal) {
+                    finalTranscript += event.results[i][0].transcript + " ";
+                } else {
+                    interimTranscript += event.results[i][0].transcript;
+                }
+            }
+            transcriptDiv.innerHTML = `<span style="color: #1e293b;"><b>${finalTranscript}</b></span><span style="color: #94a3b8;">${interimTranscript}</span>`;
+            transcriptDiv.scrollTop = transcriptDiv.scrollHeight;
+        };
+
+        recognition.onend = () => { if (isListening) recognition.start(); };
+    } else {
+        alert("Tarayıcınız ses tanımayı desteklemiyor.");
+    }
+
+    // 3. Duygu Analizi (Kameradan Kare Alma)
+    function startEmotionAnalysis() {
+        const canvas = document.createElement('canvas');
+        const context = canvas.getContext('2d');
+        canvas.width = 400; 
+        canvas.height = 300;
+
+        emotionTimer = setInterval(() => {
+            if (!isListening) return;
+
+            context.drawImage(video, 0, 0, canvas.width, canvas.height);
+            const imageData = canvas.toDataURL('image/jpeg', 0.5); 
+
+            fetch('/process_frame', {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({ image: imageData })
+            })
+            .then(res => res.json())
+            .then(data => {
+                console.log("Anlık Duygu:", data.emotion);
+            })
+            .catch(err => console.error("Kare gönderme hatası:", err));
+        }, 1000); 
+    }
+
+    // 4. Cevaplama ve Değerlendirme Butonu
+    startBtn.addEventListener('click', () => {
+        if (!isListening) {
+            isListening = true;
+            finalTranscript = "";
+            transcriptDiv.innerHTML = "<i style='color: #64748b;'>Dinleniyor... Lütfen soruyu cevaplayın.</i>";
+            recognition.start();
+            startEmotionAnalysis(); 
+            
+            startBtn.classList.remove('btn-primary');
+            startBtn.classList.add('btn-danger');
+            startBtn.innerText = "🛑 Mülakatı Bitir ve Değerlendir";
+        } else {
+            isListening = false;
+            recognition.stop();
+            clearInterval(emotionTimer); 
+            
+            startBtn.classList.remove('btn-danger');
+            startBtn.classList.add('btn-primary');
+            startBtn.innerText = "🎤 Yeni Cevap Ver";
+
+            if (finalTranscript.trim() !== "") {
+                transcriptDiv.innerHTML = `
+                    <div style="text-align: center; padding: 20px;">
+                        <span style='font-size: 24px;'>🤖</span><br>
+                        <b style='color: var(--primary);'>Sanal İK Komitesi değerlendiriyor...</b><br>
+                        <i style='color: #64748b; font-size: 14px;'>(Bu işlem birkaç saniye sürebilir)</i>
+                    </div>`;
+                
+                fetch('/analyze', {
+                    method: 'POST',
+                    headers: { 'Content-Type': 'application/json' },
+                    body: JSON.stringify({ text: finalTranscript, question: askedQuestion }) 
+                })
+                .then(response => response.json())
+                .then(data => {
+                    if (data.status === "success") {
+                        const cleanFeedback = data.feedback.replace(/\n/g, '<br>');
+                        transcriptDiv.innerHTML = `
+                            <div style="padding: 15px; background: white; border-radius: 8px;">
+                                <h3 style="color: var(--success); margin-top: 0; border-bottom: 2px solid #e2e8f0; padding-bottom: 10px;">📋 Komite Değerlendirmesi</h3>
+                                <div style="color: #0f172a; font-size: 15px;">${cleanFeedback}</div>
+                            </div>
+                        `;
+                    } else {
+                        transcriptDiv.innerHTML = `<b style="color: red;">Hata oluştu:</b> ${data.error}`;
+                    }
+                })
+                .catch(err => {
+                    transcriptDiv.innerHTML = `<b style="color: red;">Bağlantı Hatası!</b>`;
+                });
+            }
+        }
+    });
+</script>
+
+</body>
+</html>
