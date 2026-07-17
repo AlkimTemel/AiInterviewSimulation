@@ -1,7 +1,7 @@
 import google.generativeai as genai
 
 # API anahtarını buraya yapıştır
-genai.configure(api_key="AIzaSyBzmLKBju-2CT2mXlMoTFDx1AEHU_KKVVM")
+genai.configure(api_key="YOUR API KEY")
 
 print("Senin API Anahtarın İçin Desteklenen Modeller:\n" + "-"*40)
 
