@@ -32,6 +32,7 @@ Interactive UI: A user-friendly web interface built with HTML/CSS and served via
 
 Comprehensive Assessment: (/analyze endpoint) Combines text and emotion analysis to provide a final holistic evaluation of the candidate's performance.
 
+```text
 📂 Repository Structure
 Plaintext
 AiInterviewSimulation/
