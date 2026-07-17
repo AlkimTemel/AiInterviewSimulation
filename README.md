@@ -52,20 +52,3 @@ Python 3.8+
 
 A working webcam
 
-Setup Instructions
-1. Clone the repository:
-
-Bash
-git clone https://github.com/AlkimTemel/AiInterviewSimulation.git
-cd AiInterviewSimulation
-2. Install dependencies:
-(Not: Eğer bir requirements.txt dosyan varsa onu belirttim, yoksa bu adımı güncelleyebilirsin)
-
-Bash
-pip install flask tensorflow opencv-python numpy
-3. Run the application:
-
-Bash
-python app.py
-4. Access the Interface:
-Open your web browser and navigate to http://localhost:5000 to start the simulation.
