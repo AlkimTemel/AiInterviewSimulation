@@ -12,7 +12,7 @@ from tensorflow.keras.preprocessing.image import img_to_array
 app = Flask(__name__)
 
 # --- API AYARLARI ---
-os.environ["GEMINI_API_KEY"] = "AIzaSyBzmLKBju-2CT2mXlMoTFDx1AEHU_KKVVM"
+os.environ["GEMINI_API_KEY"] = "YOUR API KEY"
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
 MODEL_NAME = 'gemini-pro' # Veya sende çalışan 'gemini-1.5-flash' vb. model adı
 
